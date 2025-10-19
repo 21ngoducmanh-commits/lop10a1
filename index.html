@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Women's day - mobile friendly</title>
+
+  <!-- lightweight grid (optional) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap-grid.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
+
+  <style>
+    /* reset and base */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html,body { height: 100%; width: 100%; -webkit-font-smoothing:antialiased; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Dancing Script', sans-serif; background: #fae1dd; color: #222; }
+
+    /* container: center content but allow scrolling on small screens */
+    .page { min-height: 100vh; display:flex; align-items:center; justify-content:center; padding: 20px; }
+    .card-wrap { width: 420px; max-width: 100%; position: relative; }
+
+    /* envelope/card styles (scaled by vw on small screens) */
+    .envelope { position: relative; width: 100%; height: calc(100px + 28vw); max-height: 460px; background-color: #f08080; border-radius: 12px; overflow: visible; }
+    .envelope:before { content: ''; position: absolute; width: 70%; height: 70%; transform: rotate(45deg); top: -35%; left: 15%; border-radius: 30px 0 0 0; background: #f08080; }
+
+    .card-inside { position: absolute; left: 6%; top: 5%; width: 88%; height: 85%; background: #eae2b7; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); display:flex; align-items:flex-start; justify-content:center; padding-top: 18px; }
+    .card-text { font-family: 'Brush Script MT', cursive; font-size: clamp(18px, 6vw, 28px); color: #003049; text-align:center; line-height: 1.1; }
+
+    .front { position: absolute; right: 6%; top: -4%; width: 0; height: 0; border-right: 65% solid #f4978e; border-top: 25% solid transparent; border-bottom: 25% solid transparent; transform-origin: left center; z-index: 4; }
+
+    .heart { position: absolute; width: 10%; height: 10%; min-width: 26px; min-height: 26px; left: 40%; top: 60%; transform: rotate(-45deg); background: #d62828; border-radius: 4px; }
+    .heart:before, .heart:after { content:''; position:absolute; width:100%; height:100%; background: #d62828; border-radius:50%; }
+    .heart:before { top: -50%; left: 0; }
+    .heart:after { left: 50%; top: 0; }
+
+    /* small floating hearts (decorative) */
+    .hearts { position:absolute; inset: auto 0 6% 0; display:flex; justify-content:center; gap:8px; pointer-events:none; }
+    .hearts .dot { width:10px; height:10px; background: #e63946; transform: rotate(-45deg); border-radius: 2px; }
+
+    /* shadow under envelope */
+    .shadow { position: absolute; left: -6%; bottom: -8%; width: 112%; height: 24px; border-radius: 50%; background: rgba(0,0,0,0.18); filter: blur(6px); }
+
+    /* prompt text */
+    #text-click { display: none; font-size: clamp(18px, 6vw, 36px); color: indianred; text-align:center; margin-top: 14px; }
+
+    /* overlay letter modal */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; padding: 20px; z-index: 3000; }
+    .overlay .modal { width: min(640px, 95%); background:#FFEBEB; border-radius: 12px; padding: 18px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); }
+    .overlay .modal h2 { font-size: clamp(18px,5vw,32px); margin-bottom: 8px; }
+    .overlay .modal p { font-size: clamp(13px,3.5vw,18px); line-height: 1.4; }
+    .overlay .close { position:absolute; right: 18px; top: 18px; font-size: 22px; color: #fff; cursor:pointer; }
+
+    /* make interactive elements easy to tap */
+    .card-wrap, .envelope, .card-inside { touch-action: manipulation; }
+
+    /* animations (reduced on small screens) */
+    .valentines { animation: floatAnim 3s ease-in-out infinite; }
+    @keyframes floatAnim { 0%,100%{ transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+    /* media queries */
+    @media (max-width: 480px) {
+      .envelope { height: calc(90px + 34vw); }
+      .front { right: 8%; }
+      .card-inside { padding-top: 12px; }
+      .shadow { height: 18px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .valentines, .hearts .dot { animation: none !important; }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="card-wrap" id="cardWrap">
+      <div class="envelope valentines" id="envelope">
+        <div class="front" aria-hidden="true"></div>
+        <div class="card-inside" id="cardInside" role="button" tabindex="0" aria-label="Mở phong bì">
+          <div class="card-text">Happy<br>Women's<br>Day!</div>
+        </div>
+        <div class="heart" aria-hidden="true"></div>
+        <div class="hearts" aria-hidden="true">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+        <div class="shadow"></div>
+      </div>
+
+      <div id="text-click">Mở phong bì dưới đây</div>
+    </div>
+  </div>
+
+  <!-- overlay modal for the letter content -->
+  <div class="overlay" id="overlay">
+    <div class="close" id="overlayClose"><i class="fa-solid fa-xmark"></i></div>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="letterTitle">
+      <h2 id="letterTitle">Gửi các bạn nữ lớp 10A1</h2>
+      <p id="letterContent">Hôm nay là ngày 20/10 chúng mình chúc các bạn luôn hạnh phúc và nhiều may mắn trong cuộc sống. Hãy luôn giữ mãi nụ cười trên môi và không suy nghĩ nhiều về những thứ không đáng nha!</p>
+      <div style="margin-top:12px; text-align:center;"><img src="./image/heartAnimation.gif" alt="heart" style="max-width:160px; width:36%; height:auto"></div>
+    </div>
+  </div>
+
+  <!-- optional SVG animation kept but responsive -- can be disabled on very small screens -->
+  <svg id="theSvg" viewBox="-120 -30 240 180" style="width: 80%; max-width:420px; display:block; margin: 8px auto; opacity: 0.95;">
+    <defs>
+      <path id="shape" d="M0, 21.054 C0, 21.054 24.618, -15.165 60.750, 8.554 C93.249, 29.888 57.749, 96.888 0, 117.388 C-57.749, 96.888  -93.249, 29.888 -60.750, 8.554 C-24.618, -15.165  -0, 21.054 -0, 21.054z" />
+      <path id="partialPath" />
+    </defs>
+    <text dy="-2"><textPath xlink:href="#partialPath" startOffset="12" style="font-family: fantasy; font-size:10px; fill:#e6668a;">🌹Happy Women's Day🌹 From With Love 20/10</textPath></text>
+  </svg>
+
+  <script>
+    // Make interactions touch-friendly and accessible
+    const envelope = document.getElementById('envelope');
+    const cardInside = document.getElementById('cardInside');
+    const overlay = document.getElementById('overlay');
+    const overlayClose = document.getElementById('overlayClose');
+    const textClick = document.getElementById('text-click');
+
+    // show prompt after a short delay
+    setTimeout(()=> textClick.style.display = 'block', 1000);
+
+    function openLetter(){
+      overlay.style.display = 'flex';
+      // focus for accessibility
+      document.getElementById('letterContent').focus?.();
+    }
+    function closeLetter(){
+      overlay.style.display = 'none';
+    }
+
+    // support click/tap/keyboard 'Enter' and 'Space'
+    cardInside.addEventListener('click', openLetter);
+    cardInside.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') openLetter(); });
+
+    // support pointer (works for touch and mouse)
+    envelope.addEventListener('pointerdown', (e)=>{ e.preventDefault(); /* prevent 300ms on some browsers */ });
+
+    overlayClose.addEventListener('click', closeLetter);
+    overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeLetter(); });
+
+    // reduce animation on low-power devices
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      envelope.classList.remove('valentines');
+    }
+
+    // Optional: inline small svg writing animation from original file (kept lightweight)
+    (function(){
+      try{
+        const shape = document.getElementById('shape');
+        const partialPath = document.getElementById('partialPath');
+        if(!shape || !partialPath) return;
+        // simple stroke-draw effect using path length (no heavy computation)
+        const len = shape.getTotalLength();
+        partialPath.setAttribute('d', shape.getAttribute('d'));
+        const el = document.querySelector('#theSvg textPath');
+        // fade in
+        document.getElementById('theSvg').style.opacity = 1;
+      }catch(e){/* silent */}
+    })();
+  </script>
+
+</body>
+
+</html>
